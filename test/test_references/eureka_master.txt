@@ -1,0 +1,7 @@
+Can't find directory ../fixtures/test_repo/Eureka/
+Usage: git-survey.rb [options] [input directory]
+    -a, --anonymize                  Anonymizes the output (false)
+    -b, --branch=BRANCH              Git branch (master)
+    -n, --number=NUMBER              Number of hot files to display (10)
+    -t, --today=TODAY                Today's date for testing purposes (string)
+    -h, --help                       Prints this help
