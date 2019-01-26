@@ -1,5 +1,11 @@
-require "git_survey/version"
+require 'git_survey/version'
 
 module GitSurvey
-  # Your code goes here...
+  def self.someFunc1
+    3
+  end
+
+  def self.main(argv)
+    puts argv
+  end
 end
