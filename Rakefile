@@ -3,8 +3,8 @@ require 'rake/testtask'
 
 desc 'Make tests output references'
 task :make_test_references do
-  require_relative 'test/test_references'
-  generate_references
+  require_relative 'test/make_test_references'
+  make_test_references
   puts
   puts 'Finished generating test references, inspect them for correctness.'
   puts

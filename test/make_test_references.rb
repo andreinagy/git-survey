@@ -1,4 +1,5 @@
 SCRIPT = './bin/git-survey'.freeze
+REPO = 'test/fixtures/test_repo/Eureka/'.freeze
 
 REFERENCE_DATA = [
   ['--- Test no arguments prints help',
@@ -14,19 +15,19 @@ REFERENCE_DATA = [
    'test/test_references/invalid_argument.txt'],
 
   ['--- Test default arguments',
-   '-t now ../fixtures/test_repo/Eureka/',
+   "-t now #{REPO}",
    'test/test_references/eureka_master.txt'],
 
   ['--- Test certain branch',
-   '-b new_branch -t now ../fixtures/test_repo/Eureka/',
+   "-b new_branch -t now #{REPO}",
    'test/test_references/eureka_new_branch.txt'],
 
   ['--- Test 3 hotfiles',
-   '-n 3 -t now ../fixtures/test_repo/Eureka/',
+   "-n 3 -t now #{REPO}",
    'test/test_references/eureka_master_3hotfiles.txt'],
 
   ['--- Test anonymized',
-   '-a -t now ../fixtures/test_repo/Eureka/',
+   "-a -t now #{REPO}",
    'test/test_references/eureka_master_anonymized.txt']
 ].freeze
 
@@ -34,7 +35,8 @@ def generate_one_reference(args, file)
   `#{SCRIPT} #{args} > #{file}`
 end
 
-def generate_references
+def make_test_references
+  puts `pwd`
   REFERENCE_DATA.each do |item|
     generate_one_reference(item[1], item[2])
     puts "Generated file #{item[2]}"

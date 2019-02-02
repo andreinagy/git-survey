@@ -1,5 +1,5 @@
 require 'test_helper'
-require_relative 'test_references'
+require_relative 'make_test_references'
 
 SCRIPT = './bin/git-survey'.freeze
 

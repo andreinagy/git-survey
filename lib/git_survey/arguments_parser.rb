@@ -6,17 +6,25 @@ Options = Struct.new(:anonymize,
                      :input_directory,
                      :number_of_hotfiles,
                      :scan_date)
+
 # Parses command line arguments
 class Parser
-  def self.parse(argv)
-    # If no arguments supplied, print help
-    argv << '-h' if argv.empty?
-
+  def self.default_options
     result = Options.new
     result.anonymize = false
     result.git_branch = 'master'
     result.number_of_hotfiles = 10
     result.scan_date = Time.now.iso8601(3)
+    result.input_directory = '.'
+    result
+  end
+  private_class_method :default_options
+
+  def self.parse(argv)
+    # If no arguments supplied, print help
+    argv << '-h' if argv.empty?
+
+    result = default_options
 
     options_parser = OptionParser.new do |o|
       o.banner = 'Usage: git-survey.rb [options] [input directory]'

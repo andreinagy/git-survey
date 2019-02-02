@@ -33,7 +33,8 @@ Gem::Specification.new do |spec|
   # end
   spec.files = ['lib/git_survey.rb',
                 'lib/git_survey/arguments_parser.rb',
-                'lib/git_survey/git_adapter.rb',
+                'lib/git_survey/shell_adapter.rb',
+                'lib/git_survey/helpers.rb',
                 'lib/git_survey/version.rb']
   spec.bindir        = 'bin'
   spec.executables   = 'git-survey'

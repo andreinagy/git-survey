@@ -4,99 +4,35 @@ require 'digest'
 
 require 'git_survey/version'
 require 'git_survey/arguments_parser.rb'
-require 'git_survey/git_commands.rb'
+require 'git_survey/shell_adapter.rb'
 
 EXECUTABLE_NAME = 'git-survey'.freeze
 
+# Generates a report on a git project's history
 module GitSurvey
-  # Private helpers
-  def self._run_shell_command(directory, cmd)
-    result = `cd #{directory}; #{cmd}`
-    result
+  def self.executable_hash(options)
+    {
+      'date' => options.scan_date,
+      'anonymized' => options.anonymize,
+      'branch' => options.git_branch,
+      'hotFiles' => options.number_of_hotfiles
+    }
   end
+  private_class_method :executable_hash
 
-  def self._date_at_the_end_of(string)
-    string.split(' ').last
+  def self.repo_hash(options)
+    {
+      'name' => ShellAdapter.repo_name(options.anonymize, options.input_directory),
+      'dateOfInit' => ShellAdapter.init_date(options.input_directory),
+      'dateOfLastCommit' => ShellAdapter.latest_activity_date(options.input_directory),
+      'yearsWorkedOn' => ShellAdapter.activity_interval(options.input_directory),
+      'numberOfFiles' => ShellAdapter.number_of_files(options.input_directory),
+      'numberOfCommits' => ShellAdapter.number_of_commits(options.input_directory,
+                                                          options.git_branch),
+      'numberOfBranches' => ShellAdapter.number_of_branches(options.input_directory)
+    }
   end
-
-  def self._anonymized(anonymize, string)
-    if anonymize
-      Digest::MD5.hexdigest(string)[0...10]
-    else
-      string
-    end
-  end
-
-  def self._key_value_hash(anonymized, directory, command, split_char)
-    list = _run_shell_command(directory, command)
-           .split("\n")
-
-    result = {}
-    list.each do |line|
-      parts = line.split(split_char)
-      key = parts.last
-      value = parts.first
-
-      key = key == value ? 'empty' : _anonymized(anonymized, key)
-
-      result[key] = value.to_i
-    end
-    result
-  end
-
-  # basename `git rev-parse --show-toplevel`
-  def self.repo_name(anonimize, directory)
-    name = _run_shell_command(directory, COMMAND_REPO_NAME).strip
-    _anonymized(anonimize, name)
-  end
-
-  # git log --date=iso8601-strict --reverse |head -3 |grep "Date"
-  def self.init_date(directory)
-    string = _run_shell_command(directory, COMMAND_REPO_INIT_DATE)
-    Time.iso8601(_date_at_the_end_of(string))
-  end
-
-  # git log --date=iso8601-strict |head -3 |grep "Date"
-  def self.latest_activity_date(directory)
-    string = _run_shell_command(directory, COMMAND_LATEST_ACTIVITY_DATE)
-    Time.iso8601(_date_at_the_end_of(string))
-  end
-
-  def self.activity_interval(directory)
-    earliest = init_date(directory).to_f
-    latest = latest_activity_date(directory).to_f
-
-    diff = latest - earliest
-    (diff / (365 * 24 * 60 * 60)).round(2)
-  end
-
-  # git rev-list --count <revision>
-  def self.number_of_commits(directory, branch)
-    _run_shell_command(directory, COMMAND_COMMITS_NUMBER + branch).to_i
-  end
-
-  #  git ls-files | wc -l
-  def self.number_of_files(directory)
-    _run_shell_command(directory, COMMAND_FILES_NUMBER).to_i
-  end
-
-  # git branch | wc -l
-  def self.number_of_branches(directory)
-    _run_shell_command(directory, COMMAND_BRANCHES_NUMBER).to_i
-  end
-
-  # git shortlog -s -n
-  def self.authors(anonymized, directory)
-    _key_value_hash(anonymized, directory, COMMAND_AUTHORS, "\t")
-  end
-
-  # git log --pretty=format: --name-only | sort | uniq -c | sort -rg | head -10
-  def self.hot_files(anonymized, directory, number)
-    command = COMMAND_FILES_HOT + number.to_s
-    _key_value_hash(anonymized, directory, command, ' ')
-  end
-
-  # Main
+  private_class_method :repo_hash
 
   def self.main(_argv)
     options = Parser.parse(ARGV)
@@ -105,23 +41,13 @@ module GitSurvey
     # https://google.github.io/styleguide/jsoncstyleguide.xml
 
     result = {
-      EXECUTABLE_NAME => {
-        'date' => options.scan_date,
-        'anonymized' => options.anonymize,
-        'branch' => options.git_branch
-      },
-      'repo' => {
-        'name' => repo_name(options.anonymize, options.input_directory),
-        'dateOfInit' => init_date(options.input_directory),
-        'dateOfLatestActivity' => latest_activity_date(options.input_directory),
-        'yearsWorkedOn' => activity_interval(options.input_directory),
-        'numberOfFiles' => number_of_files(options.input_directory),
-        'numberOfCommits' => number_of_commits(options.input_directory,
-                                               options.git_branch),
-        'numberOfBranches' => number_of_branches(options.input_directory)
-      },
-      'hotFiles' => hot_files(options.anonymize, options.input_directory, options.number_of_hotfiles),
-      'authors' => authors(options.anonymize, options.input_directory)
+      EXECUTABLE_NAME => executable_hash(options),
+      'repo' => repo_hash(options),
+      'hotFiles' => ShellAdapter.hot_files(options.anonymize,
+                                           options.input_directory,
+                                           options.number_of_hotfiles),
+      'authors' => ShellAdapter.authors(options.anonymize,
+                                        options.input_directory)
     }
 
     puts JSON.pretty_generate(result)
