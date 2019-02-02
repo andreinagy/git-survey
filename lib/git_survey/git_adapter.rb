@@ -1,4 +1,2 @@
 class GitAdapter
-
-
 end
