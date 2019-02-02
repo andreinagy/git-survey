@@ -1,6 +1,15 @@
 require 'bundler/gem_tasks'
 require 'rake/testtask'
 
+desc 'Make tests output references'
+task :make_test_references do
+  require_relative 'test/test_references'
+  generate_references
+  puts
+  puts "Finished generating test references, inspect them for correctness."
+  puts
+end
+
 Rake::TestTask.new(:test) do |t|
   t.libs << 'test'
   t.libs << 'lib'

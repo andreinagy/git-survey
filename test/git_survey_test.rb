@@ -1,7 +1,5 @@
 require 'test_helper'
 
-# !/usr/bin/env ruby
-
 SCRIPT = './bin/git-survey'.freeze
 
 # switch this on to create reference files.
@@ -21,6 +19,10 @@ def test(title, args, reference_file)
   puts title
   generate_reference_if_needed(args, reference_file)
   diff_output_to_reference(args, reference_file)
+end
+
+def make_references
+     puts 'make references'
 end
 
 class GitSurveyTest < Minitest::Test
