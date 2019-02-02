@@ -21,11 +21,11 @@ REFERENCE_DATA = [
    '-b new_branch -t now ../fixtures/test_repo/Eureka/',
    'test/test_references/eureka_new_branch.txt'],
 
-  ['--- Test no arguments prints help',
+  ['--- Test 3 hotfiles',
    '-n 3 -t now ../fixtures/test_repo/Eureka/',
    'test/test_references/eureka_master_3hotfiles.txt'],
 
-  ['--- Test no arguments prints help',
+  ['--- Test anonymized',
    '-a -t now ../fixtures/test_repo/Eureka/',
    'test/test_references/eureka_master_anonymized.txt']
 ].freeze
@@ -49,6 +49,5 @@ end
 def test(title, args, reference_file)
   puts
   puts title
-  #   generate_one_reference(args, reference_file)
   diff_output_to_reference(args, reference_file)
 end
